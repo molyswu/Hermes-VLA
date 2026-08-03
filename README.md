@@ -222,24 +222,24 @@ policy.reset()                        # Reset state
 
 ## GR00T N1.7 Inference
 
-Hermes-VLA 提供了 NVIDIA GR00T N1.7 的独立推理模块，基于 [LeRobot](https://github.com/huggingface/lerobot/tree/main/src/lerobot/policies/groot) 的实现。
+Hermes-VLA includes a standalone inference module for NVIDIA GR00T N1.7, based on the [LeRobot](https://github.com/huggingface/lerobot/tree/main/src/lerobot/policies/groot) implementation.
 
-GR00T N1.7 是 NVIDIA 开源的 3B 参数 VLA 模型，基于 Qwen3-VL (Cosmos-Reason2-2B) + Flow-Matching DiT 动作头。
+GR00T N1.7 is NVIDIA's open-source 3B-parameter VLA model, built on Qwen3-VL (Cosmos-Reason2-2B) + Flow-Matching DiT action head.
 
-### 快速开始
+### Quick Start
 
 ```bash
-# 测试模式 (无需下载模型)
+# Test mode (no model download required)
 python inference_groot_n1_7.py --test
 
-# 加载模型并推理
+# Load model and run inference
 python inference_groot_n1_7.py \
     --model nvidia/GR00T-N1.7-3B \
     --task "pick up the red block" \
     --device cuda \
     --num-timesteps 4
 
-# 性能基准测试
+# Performance benchmarking
 python inference_groot_n1_7.py \
     --model nvidia/GR00T-N1.7-3B \
     --benchmark \
@@ -252,58 +252,58 @@ python inference_groot_n1_7.py \
 from groot_n1_7 import GR00TN17ForInference
 import numpy as np
 
-# 加载模型 (支持 HuggingFace Hub 和本地路径)
+# Load model (supports HuggingFace Hub and local paths)
 model = GR00TN17ForInference.from_pretrained(
     "nvidia/GR00T-N1.7-3B",
     device="cuda",
-    num_inference_timesteps=4,  # 4=快速, 10=平衡, 50=最高精度
+    num_inference_timesteps=4,  # 4=fast, 10=balanced, 50=highest quality
 )
 
-# 准备输入
+# Prepare inputs
 images = np.random.randint(0, 255, (1, 224, 224, 3), dtype=np.uint8)  # [V, H, W, C]
 state = np.random.randn(32).astype(np.float32)
 task = "pick up the red block"
 
-# 预测完整动作轨迹
+# Predict full action trajectory
 action_chunk = model.predict_action_chunk(images, state, task)  # [40, action_dim]
 
-# 单步控制 (带 temporal chunking)
+# Step-by-step control (with temporal chunking)
 model.reset()
 for step in range(100):
     action = model.select_action(images, state, task)
     robot.execute(action)
 ```
 
-### 推理参数
+### Inference Parameters
 
-| 参数 | 值 | 延迟 | 质量 | 场景 |
-|------|-----|------|------|------|
-| `num_inference_timesteps` | 4 | ~50ms | 良好 | 实时控制 |
-| | 10 | ~120ms | 很好 | 平衡 |
-| | 50 | ~600ms | 最佳 | 离线/最高精度 |
+| Parameter | Value | Latency | Quality | Use Case |
+|-----------|-------|---------|---------|----------|
+| `num_inference_timesteps` | 4 | ~50ms | Good | Real-time control |
+| | 10 | ~120ms | Great | Balanced |
+| | 50 | ~600ms | Best | Offline / max accuracy |
 
-### 文件结构
+### File Structure
 
 ```
 groot_n1_7/
-├── __init__.py                      # 模块入口
-├── configuration_groot_n1_7.py      # 配置类
-├── modeling_groot_n1_7.py           # 推理模型 (from_pretrained, predict_action_chunk)
-├── processor_groot_n1_7.py          # 预处理/后处理
-└── README.md                        # 详细文档
-inference_groot_n1_7.py              # 独立推理脚本
+├── __init__.py                      # Module entry
+├── configuration_groot_n1_7.py      # Configuration class
+├── modeling_groot_n1_7.py           # Inference model (from_pretrained, predict_action_chunk)
+├── processor_groot_n1_7.py          # Pre/post processing
+└── README.md                        # Detailed documentation
+inference_groot_n1_7.py              # Standalone inference script
 ```
 
-### 环境配置
+### Environment Setup
 
 ```bash
 pip install torch>=2.0 transformers>=4.45 accelerate numpy pillow
 
-# 完整 GR00T 支持 (推荐)
+# Full GR00T support (recommended)
 pip install isaac-gr00t
-# 或从源码: git clone https://github.com/NVIDIA/Isaac-GR00T.git && cd Isaac-GR00T && pip install -e .
+# Or from source: git clone https://github.com/NVIDIA/Isaac-GR00T.git && cd Isaac-GR00T && pip install -e .
 
-# 下载模型
+# Download model
 huggingface-cli download nvidia/GR00T-N1.7-3B
 ```
 
