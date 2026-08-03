@@ -9,7 +9,8 @@
 ## Overview
 
 Hermes-VLA is a novel **Vision-Language-Action (VLA)** framework that introduces two key innovations for robust robot manipulation:
-Authors: Tusun Wu¹*,Yuxiang Wu²* , Yuyan Wu3
+Authors: 
+Tusun Wu¹*,Yuxiang Wu²* , Yuyan Wu3
 ¹ Shenzhen Metachip Technology Co,. Ltd
 2 The Education University of Hong Kong
 
